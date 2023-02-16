@@ -10,6 +10,7 @@ from src.db.db import get_session
 from src.models.users import Users
 from src.models.schemas.users.users_request import UsersRequest
 from src.models.schemas.utils.jwt_token import JwtToken
+from src.services.utils.modified_by_now import modified_by_now
 
 
 oauth2_schema = OAuth2PasswordBearer(tokenUrl='/users/authorize')
@@ -50,7 +51,7 @@ class UsersService:
             payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
         except JWTError:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Некорректный токен')
-        
+
         # ! возвращать роль тут же или другой функцией?
         user_info_from_token = {
             'id': payload.get('sub'),
@@ -58,7 +59,7 @@ class UsersService:
         }
         
         return user_info_from_token
-    
+
     def register(self, users_schema: UsersRequest, current_user_id: int) -> None:
         is_exist = (
             self.session
@@ -67,18 +68,19 @@ class UsersService:
             .count()
         )
         if is_exist:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Пользователь с таким именем уже существует')
-        
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT)
+
         user = Users(
             username=users_schema.username,
             password_hashed=self.hash_password(users_schema.password_text),
             role=users_schema.role,
-            created_by=current_user_id,  # ! Depends(get_current_user_id) тут не работал, поэтому прокинул через параметры
+            # ! Depends(get_current_user_id) тут не работал, поэтому прокинул через параметры
+            created_by=current_user_id,
             modified_by=current_user_id,
         )
         self.session.add(user)
         self.session.commit()
-    
+
     def authorize(self, username: str, password_text: str) -> Optional[JwtToken]:
         user = (
             self.session
@@ -86,14 +88,14 @@ class UsersService:
             .filter(Users.username == username)
             .first()
         )
-        
+
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         if not self.verify_password(password_text, user.password_hashed):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        
+
         return self.create_token(user.id, user.role)
-    
+
     def all(self) -> List[Users]:
         users = (
             self.session
@@ -111,15 +113,15 @@ class UsersService:
             .first()
         )
         return user
-    
-    def update(self, user_id: int, users_schema: UsersRequest) -> Users:
-        # ! также менять modified by/at
+
+    def update(self, user_id: int, users_schema: UsersRequest, current_user: dict) -> Users:
         user = self.get(user_id)
         for field, value in users_schema:
             setattr(user, field, value)
+        modified_by_now(user, current_user)
         self.session.commit()
         return user
-    
+
     def delete(self, user_id: int):
         user = self.get(user_id)
         self.session.delete(user)

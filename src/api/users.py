@@ -44,17 +44,13 @@ def get_with_check(user_id: int, users_service: UsersService):
 
 @router.get('/all', response_model=List[UsersResponse], name='Получить всех пользователей', dependencies=[Depends(allow_work_with_users)])
 def all(users_service: UsersService = Depends()):
-    # ! убрать ошибку, типа пусто тоже норм?
-    result = users_service.all()
-    if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Пользователи отсутствуют')
-    return result
+    return users_service.all()
 
 
 @router.put('/update/{user_id}', response_model=UsersResponse, name='Изменить пользователя', dependencies=[Depends(allow_work_with_users)])
-def update(user_id: int, users_schema: UsersRequest, users_service: UsersService = Depends()):
+def update(user_id: int, users_schema: UsersRequest, users_service: UsersService = Depends(), current_user: dict = Depends(get_current_user_info)):
     get_with_check(user_id, users_service)
-    return users_service.update(user_id, users_schema)
+    return users_service.update(user_id, users_schema, current_user)
 
 
 @router.delete('/delete/{user_id}', status_code=status.HTTP_204_NO_CONTENT, name='Удалить пользователя', dependencies=[Depends(allow_work_with_users)])
