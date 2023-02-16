@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -34,7 +34,7 @@ class UsersService:
 
     @staticmethod
     def create_token(user_id: int, user_role: str) -> JwtToken:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         payload = {
             'iat': now,
             'exp': now + timedelta(seconds=settings.jwt_expires_seconds),
@@ -110,7 +110,7 @@ class UsersService:
             self.session
             .query(Users)
             .filter(Users.id == user_id)
-            .first()
+            .one_or_none()
         )
         return user
 

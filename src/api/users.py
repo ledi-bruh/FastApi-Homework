@@ -18,7 +18,10 @@ allow_work_with_users = RoleChecker(['admin'])
 
 
 @router.post('/register', status_code=status.HTTP_201_CREATED, name='Регистрация пользователя', dependencies=[Depends(allow_work_with_users)])
-def register(users_schema: UsersRequest, users_service: UsersService = Depends(), current_user: dict = Depends(get_current_user_info)) -> None:
+def register(users_schema: UsersRequest, users_service: UsersService = Depends(), current_user: dict = Depends(get_current_user_info)):
+    """
+    Регистрация пользователей доступна только администраторам.
+    """
     return users_service.register(users_schema, current_user.get('id'))
 
 
