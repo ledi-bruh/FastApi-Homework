@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 from src.db.db import get_session
 from src.models.products import Products
 from src.models.schemas.products.products_request import ProductsRequest
-from src.services.utils.modified_by_now import modified_by_now
+from src.services.utils.modify_by_now import modify_by_now
+from src.services.utils.create_by import create_by
 
 
 class ProductsService:
@@ -29,33 +30,24 @@ class ProductsService:
         )
         return product
     
+    def get_with_check(self, product_id: int) -> Products:
+        result = self.get(product_id)
+        if not result:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Продукт не найден')
+        return result
+    
     def add(self, products_schema: ProductsRequest, current_user_id: int) -> None:
-        is_exist = (
-            self.session
-            .query(Products)
-            .filter(Products.name == products_schema.name)
-            .count()
-        )
-        if is_exist:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT)
-
-        product = Products(
-            name=products_schema.name,
-            created_by=current_user_id,
-            modified_by=current_user_id,
-        )
+        product = create_by(Products(), products_schema, current_user_id)
         self.session.add(product)
         self.session.commit()
 
     def update(self, product_id: int, products_schema: ProductsRequest, current_user: dict) -> Products:
-        product = self.get(product_id)
-        for field, value in products_schema:
-            setattr(product, field, value)
-        modified_by_now(product, current_user)
+        product = self.get_with_check(product_id)
+        modify_by_now(product, products_schema, current_user)
         self.session.commit()
         return product
 
     def delete(self, product_id: int) -> None:
-        product = self.get(product_id)
+        product = self.get_with_check(product_id)
         self.session.delete(product)
         self.session.commit()
