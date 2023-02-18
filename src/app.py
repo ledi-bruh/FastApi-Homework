@@ -11,6 +11,10 @@ tags = [
         'name': 'products',
         'description': 'Категория продуктов'    
     },
+    {
+        'name': 'tanks',
+        'description': 'Категория резервуаров'    
+    },
 ]
 
 app = FastAPI(
