@@ -10,7 +10,8 @@ from src.db.db import get_session
 from src.models.users import Users
 from src.models.schemas.users.users_request import UsersRequest
 from src.models.schemas.utils.jwt_token import JwtToken
-from src.services.utils.modified_by_now import modified_by_now
+from src.services.utils.modify_by_now import modify_by_now
+from src.services.utils.create_by import create_by
 
 
 oauth2_schema = OAuth2PasswordBearer(tokenUrl='/users/authorize')
@@ -52,7 +53,6 @@ class UsersService:
         except JWTError:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Некорректный токен')
 
-        # ! возвращать роль тут же или другой функцией?
         user_info_from_token = {
             'id': payload.get('sub'),
             'role': payload.get('role'),
@@ -70,14 +70,9 @@ class UsersService:
         if is_exist:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT)
 
-        user = Users(
-            username=users_schema.username,
-            password_hashed=self.hash_password(users_schema.password_text),
-            role=users_schema.role,
-            # ! Depends(get_current_user_id) тут не работал, поэтому прокинул через параметры
-            created_by=current_user_id,
-            modified_by=current_user_id,
-        )
+        user = create_by(Users(), users_schema, current_user_id)
+        setattr(user, 'password_hashed', self.hash_password(users_schema.password_text))  # ! change_password
+        
         self.session.add(user)
         self.session.commit()
 
@@ -113,16 +108,31 @@ class UsersService:
             .one_or_none()
         )
         return user
+    
+    def get_with_check(self, user_id: int):
+        result = self.get(user_id)
+        if not result:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Пользователь не найден')
+        return result
 
     def update(self, user_id: int, users_schema: UsersRequest, current_user: dict) -> Users:
-        user = self.get(user_id)
-        for field, value in users_schema:
-            setattr(user, field, value)
-        modified_by_now(user, current_user)
+        user = self.get_with_check(user_id)
+        user_with_same_name = (
+            self.session
+            .query(Users)
+            .filter(Users.username == users_schema.username)
+            .first()
+        )
+        if user_with_same_name and user_with_same_name.id != user_id:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT)
+            
+        modify_by_now(user, users_schema, current_user)
+        setattr(user, 'password_hashed', self.hash_password(users_schema.password_text))
+        
         self.session.commit()
         return user
 
     def delete(self, user_id: int):
-        user = self.get(user_id)
+        user = self.get_with_check(user_id)
         self.session.delete(user)
         self.session.commit()

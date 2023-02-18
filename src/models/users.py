@@ -7,7 +7,7 @@ from src.models.base import Base
 class Users(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    username = Column(String, nullable=False)
+    username = Column(String, nullable=False, unique=True)
     password_hashed = Column(String, nullable=False)
     role = Column(String(length=6), server_default='viewer', nullable=False)  # ? сделать таблицу UserRoles?
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

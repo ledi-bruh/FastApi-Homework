@@ -35,14 +35,7 @@ def authorize(auth_schema: OAuth2PasswordRequestForm = Depends(), users_service:
 
 @router.get('/get/{user_id}', response_model=UsersResponse, name='Получить пользователя', dependencies=[Depends(allow_work_with_users)])
 def get(user_id: int, users_service: UsersService = Depends()):
-    return get_with_check(user_id, users_service)
-
-
-def get_with_check(user_id: int, users_service: UsersService):
-    result = users_service.get(user_id)
-    if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Пользователь не найден')
-    return result
+    return users_service.get_with_check(user_id)
 
 
 @router.get('/all', response_model=List[UsersResponse], name='Получить всех пользователей', dependencies=[Depends(allow_work_with_users)])
@@ -52,11 +45,9 @@ def all(users_service: UsersService = Depends()):
 
 @router.put('/update/{user_id}', response_model=UsersResponse, name='Изменить пользователя', dependencies=[Depends(allow_work_with_users)])
 def update(user_id: int, users_schema: UsersRequest, users_service: UsersService = Depends(), current_user: dict = Depends(get_current_user_info)):
-    get_with_check(user_id, users_service)
     return users_service.update(user_id, users_schema, current_user)
 
 
 @router.delete('/delete/{user_id}', status_code=status.HTTP_204_NO_CONTENT, name='Удалить пользователя', dependencies=[Depends(allow_work_with_users)])
 def delete(user_id: int, users_service: UsersService = Depends()):
-    get_with_check(user_id, users_service)
     return users_service.delete(user_id)
