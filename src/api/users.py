@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import List
 from src.models.schemas.users.users_request import UsersRequest
@@ -27,10 +27,7 @@ def register(users_schema: UsersRequest, users_service: UsersService = Depends()
 
 @router.post('/authorize', response_model=JwtToken, name='Авторизация пользователя')
 def authorize(auth_schema: OAuth2PasswordRequestForm = Depends(), users_service: UsersService = Depends()) -> JwtToken:
-    result = users_service.authorize(auth_schema.username, auth_schema.password)
-    if not result:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Ошибка авторизации')
-    return result
+    return users_service.authorize(auth_schema.username, auth_schema.password)
 
 
 @router.get('/get/{user_id}', response_model=UsersResponse, name='Получить пользователя', dependencies=[Depends(allow_work_with_users)])
