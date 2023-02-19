@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from src.models.schemas.products.products_response import ProductsResponse
 
 
 class TanksResponse(BaseModel):
@@ -7,7 +8,7 @@ class TanksResponse(BaseModel):
     name: str
     max_capacity: float
     current_capacity: float
-    product_id: int
+    product: ProductsResponse
     created_at: datetime
     created_by: int
     modified_at: datetime
