@@ -36,14 +36,18 @@ class ProductsService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Продукт не найден')
         return result
     
-    def add(self, products_schema: ProductsRequest, current_user_id: int) -> None:
-        product = create_by(Products(), products_schema, current_user_id)
+    def add(self, products_schema: ProductsRequest, current_user: dict) -> None:
+        product = create_by(Products(), products_schema, current_user)
         self.session.add(product)
         self.session.commit()
 
     def update(self, product_id: int, products_schema: ProductsRequest, current_user: dict) -> Products:
         product = self.get_with_check(product_id)
-        modify_by_now(product, products_schema, current_user)
+        
+        for field, value in products_schema:
+            setattr(product, field, value)
+        modify_by_now(product, current_user)
+        
         self.session.commit()
         return product
 

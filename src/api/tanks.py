@@ -25,7 +25,7 @@ def all(tanks_service: TanksService = Depends()):
 
 @router.post('/add', status_code=status.HTTP_201_CREATED, name='Добавить резервуар')
 def add(tanks_schema: TanksRequest, tanks_service: TanksService = Depends(), current_user: dict = Depends(get_current_user_info)):
-    return tanks_service.add(tanks_schema, current_user.get('id'))
+    return tanks_service.add(tanks_schema, current_user)
 
 
 @router.put('/update/{tank_id}', response_model=TanksResponse, name='Изменить данные о резервуаре')
@@ -36,3 +36,8 @@ def update(tank_id: int, tanks_schema: TanksRequest, tanks_service: TanksService
 @router.delete('/delete/{tank_id}', status_code=status.HTTP_204_NO_CONTENT, name='Удалить данные о резервуаре')
 def delete(tank_id: int, tanks_service: TanksService = Depends()):
     return tanks_service.delete(tank_id)
+
+
+@router.put('/update/{tank_id}/capacity={current_capacity}', response_model=TanksResponse, name='Обновить ёмкость резервуара')
+def set_capacity(tank_id: int, current_capacity: float, tanks_service: TanksService = Depends(), current_user: dict = Depends(get_current_user_info)):
+    return tanks_service.set_capacity(tank_id, current_capacity, current_user)

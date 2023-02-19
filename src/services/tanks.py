@@ -37,10 +37,10 @@ class TanksService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Резервуар не найден')
         return result
     
-    def add(self, tanks_schema: TanksRequest, current_user_id: int) -> None:            
+    def add(self, tanks_schema: TanksRequest, current_user: dict) -> None:            
         ProductsService(self.session).get_with_check(tanks_schema.product_id)
         
-        tank = create_by(Tanks(), tanks_schema, current_user_id)
+        tank = create_by(Tanks(), tanks_schema, current_user)
         
         self.session.add(tank)
         self.session.commit()
@@ -49,7 +49,9 @@ class TanksService:
         tank = self.get_with_check(tank_id)
         ProductsService(self.session).get_with_check(tanks_schema.product_id)
         
-        modify_by_now(tank, tanks_schema, current_user)
+        for field, value in tanks_schema:
+            setattr(tank, field, value)
+        modify_by_now(tank, current_user)
         
         self.session.commit()
         return tank
@@ -58,3 +60,12 @@ class TanksService:
         tank = self.get_with_check(tank_id)
         self.session.delete(tank)
         self.session.commit()
+    
+    def set_capacity(self, tank_id: int, current_capacity: float, current_user: dict):
+        tank = self.get_with_check(tank_id)
+        
+        setattr(tank, 'current_capacity', current_capacity)
+        modify_by_now(tank, current_user)
+        
+        self.session.commit()
+        return tank

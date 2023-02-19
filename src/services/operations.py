@@ -38,11 +38,11 @@ class OperationsService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Операция не найдена')
         return result
     
-    def add(self, operations_schema: OperationsRequest, current_user_id: int) -> None:
+    def add(self, operations_schema: OperationsRequest, current_user: dict) -> None:
         TanksService(self.session).get_with_check(operations_schema.tank_id)
         ProductsService(self.session).get_with_check(operations_schema.product_id)
         
-        operation = create_by(Operations(), operations_schema, current_user_id)
+        operation = create_by(Operations(), operations_schema, current_user)
         
         self.session.add(operation)
         self.session.commit()
@@ -52,7 +52,9 @@ class OperationsService:
         TanksService(self.session).get_with_check(operations_schema.tank_id)
         ProductsService(self.session).get_with_check(operations_schema.product_id)
         
-        modify_by_now(operation, operations_schema, current_user)
+        for field, value in operations_schema:
+            setattr(operation, field, value)
+        modify_by_now(operation, current_user)
         
         self.session.commit()
         return operation

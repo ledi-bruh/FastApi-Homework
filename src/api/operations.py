@@ -25,7 +25,7 @@ def all(operations_service: OperationsService = Depends()):
 
 @router.post('/add', status_code=status.HTTP_201_CREATED, name='Добавить операцию')
 def add(operations_schema: OperationsRequest, operations_service: OperationsService = Depends(), current_user: dict = Depends(get_current_user_info)):
-    return operations_service.add(operations_schema, current_user.get('id'))
+    return operations_service.add(operations_schema, current_user)
 
 
 @router.put('/update/{operation_id}', response_model=OperationsResponse, name='Изменить данные об операции')
@@ -33,6 +33,6 @@ def update(operation_id: int, operations_schema: OperationsRequest, operations_s
     return operations_service.update(operation_id, operations_schema, current_user)
 
 
-@router.delete('/delete/{operation_id}', status_code=status.HTTP_204_NO_CONTENT, name='Удалить данные о резервуаре')
+@router.delete('/delete/{operation_id}', status_code=status.HTTP_204_NO_CONTENT, name='Удалить данные об операции')
 def delete(operation_id: int, operations_service: OperationsService = Depends()):
     return operations_service.delete(operation_id)

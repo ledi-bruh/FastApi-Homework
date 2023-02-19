@@ -26,7 +26,7 @@ def all(products_service: ProductsService = Depends()):
 
 @router.post('/add', status_code=status.HTTP_201_CREATED, name='Добавление продукта')
 def add(products_schema: ProductsRequest, products_service: ProductsService = Depends(), current_user: dict = Depends(get_current_user_info)):
-    return products_service.add(products_schema, current_user.get('id'))
+    return products_service.add(products_schema, current_user)
 
 
 @router.put('/update/{product_id}', response_model=ProductsResponse, name='Изменить продукт')

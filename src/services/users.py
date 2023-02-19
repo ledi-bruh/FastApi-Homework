@@ -60,7 +60,7 @@ class UsersService:
         
         return user_info_from_token
 
-    def register(self, users_schema: UsersRequest, current_user_id: int) -> None:
+    def register(self, users_schema: UsersRequest, current_user: dict) -> None:
         is_exist = (
             self.session
             .query(Users)
@@ -70,7 +70,7 @@ class UsersService:
         if is_exist:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT)
 
-        user = create_by(Users(), users_schema, current_user_id)
+        user = create_by(Users(), users_schema, current_user)
         setattr(user, 'password_hashed', self.hash_password(users_schema.password_text))  # ! change_password
         
         self.session.add(user)
@@ -126,8 +126,10 @@ class UsersService:
         if user_with_same_name and user_with_same_name.id != user_id:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT)
             
-        modify_by_now(user, users_schema, current_user)
+        for field, value in users_schema:
+            setattr(user, field, value)
         setattr(user, 'password_hashed', self.hash_password(users_schema.password_text))
+        modify_by_now(user, current_user)
         
         self.session.commit()
         return user
