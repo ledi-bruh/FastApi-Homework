@@ -36,3 +36,8 @@ def update(operation_id: int, operations_schema: OperationsRequest, operations_s
 @router.delete('/delete/{operation_id}', status_code=status.HTTP_204_NO_CONTENT, name='Удалить данные об операции')
 def delete(operation_id: int, operations_service: OperationsService = Depends()):
     return operations_service.delete(operation_id)
+
+
+@router.get('/all/{tank_id}', response_model=List[OperationsResponse], name='Получить данные о всех операциях с резервуаром')
+def all_by_tank_id(tank_id: int, operations_service: OperationsService = Depends()):
+    return operations_service.all_by_tank_id(tank_id)

@@ -63,3 +63,13 @@ class OperationsService:
         operation = self.get_with_check(operation_id)
         self.session.delete(operation)
         self.session.commit()
+    
+    def all_by_tank_id(self, tank_id: int) -> List[Operations]:
+        operations = (
+            self.session
+            .query(Operations)
+            .filter(Operations.tank_id == tank_id)
+            .order_by(Operations.id.asc())
+            .all()
+        )
+        return operations
