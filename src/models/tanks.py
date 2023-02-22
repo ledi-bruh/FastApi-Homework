@@ -14,6 +14,6 @@ class Tanks(Base):
     product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     created_by = Column(Integer, ForeignKey('users.id'), nullable=False)
-    modified_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     modified_by = Column(Integer, ForeignKey('users.id'), nullable=False)
     product = relationship('Products', backref='tank_product')

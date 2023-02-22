@@ -4,8 +4,7 @@ from sqlalchemy.orm import Session
 from src.db.db import get_session
 from src.models.tanks import Tanks
 from src.models.schemas.tanks.tanks_request import TanksRequest
-from src.services.utils.modify_by_now import modify_by_now
-from src.services.utils.create_by import create_by
+from src.services.users import modify_by, create_by
 from src.services.products import ProductsService
 
 
@@ -51,7 +50,7 @@ class TanksService:
         
         for field, value in tanks_schema:
             setattr(tank, field, value)
-        modify_by_now(tank, current_user)
+        modify_by(tank, current_user)
         
         self.session.commit()
         return tank
@@ -65,7 +64,7 @@ class TanksService:
         tank = self.get_with_check(tank_id)
         
         setattr(tank, 'current_capacity', current_capacity)
-        modify_by_now(tank, current_user)
+        modify_by(tank, current_user)
         
         self.session.commit()
         return tank

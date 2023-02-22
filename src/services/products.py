@@ -4,8 +4,7 @@ from sqlalchemy.orm import Session
 from src.db.db import get_session
 from src.models.products import Products
 from src.models.schemas.products.products_request import ProductsRequest
-from src.services.utils.modify_by_now import modify_by_now
-from src.services.utils.create_by import create_by
+from src.services.users import modify_by, create_by
 
 
 class ProductsService:
@@ -46,7 +45,7 @@ class ProductsService:
         
         for field, value in products_schema:
             setattr(product, field, value)
-        modify_by_now(product, current_user)
+        modify_by(product, current_user)
         
         self.session.commit()
         return product

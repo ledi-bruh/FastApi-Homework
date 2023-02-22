@@ -1,5 +1,6 @@
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
+from pydantic import BaseModel
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -7,11 +8,10 @@ from passlib.handlers.pbkdf2 import pbkdf2_sha256
 from sqlalchemy.orm import Session
 from src.core.settings import settings
 from src.db.db import get_session
+from src.models.base import Base
 from src.models.users import Users
 from src.models.schemas.users.users_request import UsersRequest
 from src.models.schemas.utils.jwt_token import JwtToken
-from src.services.utils.modify_by_now import modify_by_now
-from src.services.utils.create_by import create_by
 
 
 oauth2_schema = OAuth2PasswordBearer(tokenUrl='/users/authorize')
@@ -19,6 +19,18 @@ oauth2_schema = OAuth2PasswordBearer(tokenUrl='/users/authorize')
 
 def get_current_user_info(token: str = Depends(oauth2_schema)) -> dict:
     return UsersService.verify_token(token)
+
+
+def modify_by(model: Base, current_user: dict) -> None:
+    setattr(model, 'modified_by', current_user.get('id'))
+
+
+def create_by(model: Base, schema: BaseModel, current_user: dict) -> Base:
+    for field, value in schema:
+        setattr(model, field, value)
+    setattr(model, 'created_by', current_user.get('id'))
+    modify_by(model, current_user)
+    return model
 
 
 class UsersService:
@@ -129,7 +141,7 @@ class UsersService:
         for field, value in users_schema:
             setattr(user, field, value)
         setattr(user, 'password_hashed', self.hash_password(users_schema.password_text))
-        modify_by_now(user, current_user)
+        modify_by(user, current_user)
         
         self.session.commit()
         return user

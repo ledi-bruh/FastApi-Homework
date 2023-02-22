@@ -6,8 +6,7 @@ from sqlalchemy.orm import Session
 from src.db.db import get_session
 from src.models.operations import Operations
 from src.models.schemas.operations.operations_request import OperationsRequest
-from src.services.utils.modify_by_now import modify_by_now
-from src.services.utils.create_by import create_by
+from src.services.users import modify_by, create_by
 from src.services.tanks import TanksService
 from src.services.products import ProductsService
 from src.services.files import download
@@ -58,7 +57,7 @@ class OperationsService:
         
         for field, value in operations_schema:
             setattr(operation, field, value)
-        modify_by_now(operation, current_user)
+        modify_by(operation, current_user)
         
         self.session.commit()
         return operation
