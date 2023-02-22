@@ -1,5 +1,5 @@
-from src.models.users import Users
 from src.core.settings import settings
+from src.models.users import Users
 from src.services.users import UsersService
 from src.db.db import Session
 

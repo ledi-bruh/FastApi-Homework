@@ -1,6 +1,6 @@
+from typing import List
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
-from typing import List
 from src.models.schemas.users.users_request import UsersRequest
 from src.models.schemas.users.users_response import UsersResponse
 from src.models.schemas.utils.jwt_token import JwtToken

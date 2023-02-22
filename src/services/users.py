@@ -51,7 +51,7 @@ class UsersService:
         payload = {
             'iat': now,
             'exp': now + timedelta(seconds=settings.jwt_expires_seconds),
-            'sub': str(user_id),  # ! обязательно str?
+            'sub': str(user_id),
             'role': user_role,
         }
         token = jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
@@ -144,7 +144,7 @@ class UsersService:
         self.session.commit()
         return user
 
-    def delete(self, user_id: int):
+    def delete(self, user_id: int) -> None:
         user = self.get(user_id)
         self.session.delete(user)
         self.session.commit()

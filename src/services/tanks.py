@@ -58,7 +58,7 @@ class TanksService:
         self.session.delete(tank)
         self.session.commit()
     
-    def set_capacity(self, tank_id: int, current_capacity: float, current_user: dict):
+    def set_capacity(self, tank_id: int, current_capacity: float, current_user: dict) -> Tanks:
         tank = self.get(tank_id)
         
         setattr(tank, 'current_capacity', current_capacity)

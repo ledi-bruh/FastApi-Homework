@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, status
 from typing import List
+from fastapi import APIRouter, Depends, status
 from src.models.schemas.products.products_request import ProductsRequest
 from src.models.schemas.products.products_response import ProductsResponse
 from src.services.products import ProductsService

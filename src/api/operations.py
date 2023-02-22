@@ -1,7 +1,7 @@
+from datetime import datetime
+from typing import List
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import StreamingResponse
-from typing import List
-from datetime import datetime
 from src.models.schemas.operations.operations_request import OperationsRequest
 from src.models.schemas.operations.operations_response import OperationsResponse
 from src.services.operations import OperationsService

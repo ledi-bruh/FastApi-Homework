@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, status
 from typing import List
+from fastapi import APIRouter, Depends, status
 from src.models.schemas.tanks.tanks_request import TanksRequest
 from src.models.schemas.tanks.tanks_response import TanksResponse
 from src.services.tanks import TanksService
