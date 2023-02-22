@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 
 class UsersResponse(BaseModel):
@@ -7,9 +8,9 @@ class UsersResponse(BaseModel):
     username: str
     role: str
     created_at: datetime
-    created_by: int = None
+    created_by: Optional[int]
     modified_at: datetime
-    modified_by: int = None
+    modified_by: Optional[int]
 
     class Config:
         orm_mode = True
