@@ -28,40 +28,38 @@ class TanksService:
             .filter(Tanks.id == tank_id)
             .one_or_none()
         )
-        return tank
 
-    def get_with_check(self, tank_id: int) -> Tanks:
-        result = self.get(tank_id)
-        if not result:
+        if not tank:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Резервуар не найден')
-        return result
+
+        return tank
     
-    def add(self, tanks_schema: TanksRequest, current_user: dict) -> None:            
-        ProductsService(self.session).get_with_check(tanks_schema.product_id)
+    def add(self, tanks_schema: TanksRequest, current_user: dict) -> None:
+        ProductsService(self.session).get(tanks_schema.product_id)
         
         tank = create_by(Tanks(), tanks_schema, current_user)
-        
+
         self.session.add(tank)
         self.session.commit()
 
     def update(self, tank_id: int, tanks_schema: TanksRequest, current_user: dict) -> Tanks:
-        tank = self.get_with_check(tank_id)
-        ProductsService(self.session).get_with_check(tanks_schema.product_id)
-        
+        tank = self.get(tank_id)
+        ProductsService(self.session).get(tanks_schema.product_id)
+
         for field, value in tanks_schema:
             setattr(tank, field, value)
         modify_by(tank, current_user)
-        
+
         self.session.commit()
         return tank
 
     def delete(self, tank_id: int) -> None:
-        tank = self.get_with_check(tank_id)
+        tank = self.get(tank_id)
         self.session.delete(tank)
         self.session.commit()
     
     def set_capacity(self, tank_id: int, current_capacity: float, current_user: dict):
-        tank = self.get_with_check(tank_id)
+        tank = self.get(tank_id)
         
         setattr(tank, 'current_capacity', current_capacity)
         modify_by(tank, current_user)

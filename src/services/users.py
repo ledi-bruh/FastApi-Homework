@@ -119,16 +119,14 @@ class UsersService:
             .filter(Users.id == user_id)
             .one_or_none()
         )
-        return user
-    
-    def get_with_check(self, user_id: int):
-        result = self.get(user_id)
-        if not result:
+        
+        if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Пользователь не найден')
-        return result
+        
+        return user
 
     def update(self, user_id: int, users_schema: UsersRequest, current_user: dict) -> Users:
-        user = self.get_with_check(user_id)
+        user = self.get(user_id)
         user_with_same_name = (
             self.session
             .query(Users)
@@ -147,6 +145,6 @@ class UsersService:
         return user
 
     def delete(self, user_id: int):
-        user = self.get_with_check(user_id)
+        user = self.get(user_id)
         self.session.delete(user)
         self.session.commit()

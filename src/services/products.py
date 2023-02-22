@@ -27,13 +27,11 @@ class ProductsService:
             .filter(Products.id == product_id)
             .one_or_none()
         )
-        return product
-    
-    def get_with_check(self, product_id: int) -> Products:
-        result = self.get(product_id)
-        if not result:
+        
+        if not product:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Продукт не найден')
-        return result
+        
+        return product
     
     def add(self, products_schema: ProductsRequest, current_user: dict) -> None:
         product = create_by(Products(), products_schema, current_user)
@@ -41,7 +39,7 @@ class ProductsService:
         self.session.commit()
 
     def update(self, product_id: int, products_schema: ProductsRequest, current_user: dict) -> Products:
-        product = self.get_with_check(product_id)
+        product = self.get(product_id)
         
         for field, value in products_schema:
             setattr(product, field, value)
@@ -51,6 +49,6 @@ class ProductsService:
         return product
 
     def delete(self, product_id: int) -> None:
-        product = self.get_with_check(product_id)
+        product = self.get(product_id)
         self.session.delete(product)
         self.session.commit()

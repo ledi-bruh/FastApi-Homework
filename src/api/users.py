@@ -35,7 +35,7 @@ def get(user_id: int, users_service: UsersService = Depends()):
     """
     Доступно только администраторам.
     """
-    return users_service.get_with_check(user_id)
+    return users_service.get(user_id)
 
 
 @router.get('/all', response_model=List[UsersResponse], name='Получить всех пользователей', dependencies=[Depends(allow_work_with_users)])

@@ -17,7 +17,7 @@ router = APIRouter(
 
 @router.get('/get/{operation_id}', response_model=OperationsResponse, name='Получить данные об операции')
 def get(operation_id: int, operations_service: OperationsService = Depends()):
-    return operations_service.get_with_check(operation_id)
+    return operations_service.get(operation_id)
 
 
 @router.get('/all', response_model=List[OperationsResponse], name='Получить данные о всех операциях')

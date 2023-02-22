@@ -32,18 +32,16 @@ class OperationsService:
             .filter(Operations.id == operation_id)
             .one_or_none()
         )
-        return operation
-
-    def get_with_check(self, operation_id: int) -> Operations:
-        result = self.get(operation_id)
-        if not result:
+        
+        if not operation:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Операция не найдена')
-        return result
+        
+        return operation
     
     def add(self, operations_schema: OperationsRequest, current_user: dict) -> None:
         # ! Как следовало бы правильно вызвать эту проверку?
-        TanksService(self.session).get_with_check(operations_schema.tank_id)
-        ProductsService(self.session).get_with_check(operations_schema.product_id)
+        TanksService(self.session).get(operations_schema.tank_id)
+        ProductsService(self.session).get(operations_schema.product_id)
         
         operation = create_by(Operations(), operations_schema, current_user)
         
@@ -51,9 +49,9 @@ class OperationsService:
         self.session.commit()
 
     def update(self, operation_id: int, operations_schema: OperationsRequest, current_user: dict) -> Operations:
-        operation = self.get_with_check(operation_id)
-        TanksService(self.session).get_with_check(operations_schema.tank_id)
-        ProductsService(self.session).get_with_check(operations_schema.product_id)
+        operation = self.get(operation_id)
+        TanksService(self.session).get(operations_schema.tank_id)
+        ProductsService(self.session).get(operations_schema.product_id)
         
         for field, value in operations_schema:
             setattr(operation, field, value)
@@ -63,7 +61,7 @@ class OperationsService:
         return operation
 
     def delete(self, operation_id: int) -> None:
-        operation = self.get_with_check(operation_id)
+        operation = self.get(operation_id)
         self.session.delete(operation)
         self.session.commit()
     

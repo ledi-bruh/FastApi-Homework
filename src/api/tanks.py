@@ -15,7 +15,7 @@ router = APIRouter(
 
 @router.get('/get/{tank_id}', response_model=TanksResponse, name='Получить данные о резервуаре')
 def get(tank_id: int, tanks_service: TanksService = Depends()):
-    return tanks_service.get_with_check(tank_id)
+    return tanks_service.get(tank_id)
 
 
 @router.get('/all', response_model=List[TanksResponse], name='Получить данные о всех резервуарах')

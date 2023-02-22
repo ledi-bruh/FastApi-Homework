@@ -15,7 +15,7 @@ router = APIRouter(
 
 @router.get('/get/{product_id}', response_model=ProductsResponse, name='Получить продукт')
 def get(product_id: int, products_service: ProductsService = Depends()):
-    return products_service.get_with_check(product_id)
+    return products_service.get(product_id)
 
 
 @router.get('/all', response_model=List[ProductsResponse], name='Получить все продукты')
