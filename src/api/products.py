@@ -18,7 +18,6 @@ def get(product_id: int, products_service: ProductsService = Depends()):
     return products_service.get_with_check(product_id)
 
 
-
 @router.get('/all', response_model=List[ProductsResponse], name='Получить все продукты')
 def all(products_service: ProductsService = Depends()):
     return products_service.all()

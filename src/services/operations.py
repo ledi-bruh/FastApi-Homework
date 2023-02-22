@@ -1,4 +1,6 @@
+from io import StringIO
 from typing import List
+from datetime import datetime
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.db.db import get_session
@@ -8,6 +10,7 @@ from src.services.utils.modify_by_now import modify_by_now
 from src.services.utils.create_by import create_by
 from src.services.tanks import TanksService
 from src.services.products import ProductsService
+from src.services.files import download
 
 
 class OperationsService:
@@ -39,6 +42,7 @@ class OperationsService:
         return result
     
     def add(self, operations_schema: OperationsRequest, current_user: dict) -> None:
+        # ! Как следовало бы правильно вызвать эту проверку?
         TanksService(self.session).get_with_check(operations_schema.tank_id)
         ProductsService(self.session).get_with_check(operations_schema.product_id)
         
@@ -73,3 +77,23 @@ class OperationsService:
             .all()
         )
         return operations
+
+    def get_report(self, tank_id: int, product_id: int, date_start: datetime, date_end: datetime) -> StringIO:
+        operations = (
+            self.session
+            .query(Operations)
+            .filter(Operations.tank_id == tank_id, Operations.product_id == product_id)
+            # ! диапазон из параметров внутри диапазона операции
+            .filter(Operations.date_start <= date_start, Operations.date_end >= date_end)
+            .order_by(Operations.id.asc())
+            .all()
+        )
+        
+        if not operations:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Операций по данным параметрам не найдено')
+        
+        # ! как лучше получить только эти поля?
+        fieldnames = ['id', 'mass', 'date_start', 'date_end', 'tank_id', 'product_id', 'created_at', 'created_by', 'modified_at', 'modified_by']
+        report = download(operations, fieldnames)
+        
+        return report

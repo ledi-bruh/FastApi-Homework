@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, status
+from fastapi.responses import StreamingResponse
 from typing import List
+from datetime import datetime
 from src.models.schemas.operations.operations_request import OperationsRequest
 from src.models.schemas.operations.operations_response import OperationsResponse
 from src.services.operations import OperationsService
@@ -41,3 +43,8 @@ def delete(operation_id: int, operations_service: OperationsService = Depends())
 @router.get('/all/{tank_id}', response_model=List[OperationsResponse], name='Получить данные о всех операциях с резервуаром')
 def all_by_tank_id(tank_id: int, operations_service: OperationsService = Depends()):
     return operations_service.all_by_tank_id(tank_id)
+
+@router.get('/download/report/', name='Скачать отчет по операциям')
+def download_report_csv(tank_id: int, product_id: int, date_start: datetime, date_end: datetime, operations_service: OperationsService = Depends()):
+    report = operations_service.get_report(tank_id, product_id, date_start, date_end)
+    return StreamingResponse(report, media_type='text/csv', headers={'Content-Disposition': 'attachment; filename=report_operations.csv'})

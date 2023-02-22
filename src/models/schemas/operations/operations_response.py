@@ -9,7 +9,9 @@ class OperationsResponse(BaseModel):
     mass: float
     date_start: datetime
     date_end: datetime
+    tank_id: int
     tank: TanksResponse
+    product_id: int
     product: ProductsResponse
     created_at: datetime
     created_by: int
