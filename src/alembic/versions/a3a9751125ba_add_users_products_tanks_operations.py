@@ -1,8 +1,8 @@
-"""Add operations, products, tanks, users
+"""Add users, products, tanks, operations
 
-Revision ID: 3d1974dec72a
+Revision ID: a3a9751125ba
 Revises: 
-Create Date: 2023-02-16 11:31:30.626983
+Create Date: 2023-02-23 18:02:54.857966
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '3d1974dec72a'
+revision = 'a3a9751125ba'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,7 +29,8 @@ def upgrade() -> None:
     sa.Column('modified_by', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
     sa.ForeignKeyConstraint(['modified_by'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('username')
     )
     op.create_table('products',
     sa.Column('id', sa.Integer(), nullable=False),
